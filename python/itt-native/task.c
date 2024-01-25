@@ -3,7 +3,8 @@
 char docstring_itt_task_begin[] = "void ITTAPI __itt_task_begin(const __itt_domain *domain, __itt_id taskid, __itt_id parentid, __itt_string_handle *name);";
 char docstring_itt_task_end[] = "void ITTAPI __itt_task_end(const __itt_domain *domain);";
 
-PyObject* py_itt_task_begin(PyObject* self, PyObject* args){
+PyObject* py_itt_task_begin(PyObject* self, PyObject* args)
+{
     PyObject *py_domain, *py_string_handle, *py_taskid, *py_parentid;
     __itt_domain* domain;
     __itt_string_handle* string_handle;
@@ -20,7 +21,8 @@ PyObject* py_itt_task_begin(PyObject* self, PyObject* args){
     Py_RETURN_NONE;
 }
 
-PyObject* py_itt_task_end(PyObject* self, PyObject* args){
+PyObject* py_itt_task_end(PyObject* self, PyObject* args)
+{
     PyObject *py_domain;
     __itt_domain* domain;
 

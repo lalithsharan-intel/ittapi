@@ -20,16 +20,30 @@ static PyMethodDef itt_methods[] = {
     {"py_itt_task_end",py_itt_task_end,METH_VARARGS,docstring_itt_task_end},
 
     // string_handle
+    #if ITT_PLATFORM==ITT_PLATFORM_WIN
+    {"py_itt_string_handle_createA",py_itt_string_handle_createA,METH_VARARGS,docstring_itt_string_handle_create},
+    {"py_itt_string_handle_createW",py_itt_string_handle_createW,METH_VARARGS,docstring_itt_string_handle_create},
+    #else
     {"py_itt_string_handle_create",py_itt_string_handle_create,METH_VARARGS,docstring_itt_string_handle_create},
+    #endif
 
     // pt
+    #if ITT_PLATFORM==ITT_PLATFORM_WIN
+    {"py_itt_pt_region_createA", py_itt_pt_region_createA,METH_VARARGS, docstring_itt_pt_region_create},
+    {"py_itt_pt_region_createW", py_itt_pt_region_createW,METH_VARARGS, docstring_itt_pt_region_create},
+    #else
     {"py_itt_pt_region_create", py_itt_pt_region_create,METH_VARARGS, docstring_itt_pt_region_create},
+    #endif
     {"py_itt_mark_pt_region_begin", py_itt_mark_pt_region_begin, METH_VARARGS, docstring_itt_mark_pt_region_begin},
     {"py_itt_mark_pt_region_end", py_itt_mark_pt_region_end, METH_VARARGS, docstring_itt_mark_pt_region_end},
 
-    // domain    
+    // domain
+    #if ITT_PLATFORM==ITT_PLATFORM_WIN
+    {"py_itt_domain_createA",py_itt_domain_createA,METH_VARARGS,docstring_itt_domain_create},
+    {"py_itt_domain_createW",py_itt_domain_createW,METH_VARARGS,docstring_itt_domain_create},
+    #else
     {"py_itt_domain_create",py_itt_domain_create,METH_VARARGS,docstring_itt_domain_create},
-
+    #endif
     // End
     {NULL, NULL, 0, NULL}
 };
