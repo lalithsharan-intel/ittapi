@@ -4,64 +4,56 @@ import os
 import sys
 import platform
 import sysconfig
+import subprocess
 
 extension_args = {
     'name' : 'itt_native',
-    'sources' : [
-            'itt-native/itt_python.c', 'itt-native/task.c', 'itt-native/collection_control.c', 
-            'itt-native/string_handle.c', 'itt-native/domain.c', 'itt-native/pt.c' 
-        ],
-    'extra_objects' : [],
+    'sources' : [],
     'include_dirs' : [],
-    'library_dirs' : [],
+    'extra_objects': []
 }
+
+# python extension sources
+extension_args["sources"].extend(
+    [
+        'itt-native/itt_python.c', 'itt-native/task.c', 'itt-native/collection_control.c', 
+        'itt-native/string_handle.c', 'itt-native/domain.c', 'itt-native/pt.c'
+    ]
+)
+
+bits = '62' if (sys.maxsize > 2**32) else '32'
+
+python_ext_dir = os.path.dirname(__file__)
+ittapi_dir = os.path.realpath(os.path.join(python_ext_dir, '..'))
 
 # path for Python.h
 python_include_dir = sysconfig.get_path("include")
 extension_args["include_dirs"] = [python_include_dir]
 
-# path for ittnotify.h
-ITT_INCLUDE_DIR_ENV = "ITT_INCLUDE_DIR"
-itt_include = None
-itt_include_file_name = "ittnotify.h"
-itt_include_dir = os.environ.get(ITT_INCLUDE_DIR_ENV, None)
-if itt_include_dir:
-    itt_include_dir = itt_include_dir.replace('"','')
-    print('{} is set to {}'.format(ITT_INCLUDE_DIR_ENV,itt_include_dir))
-    itt_include = os.path.join(itt_include_dir, itt_include_file_name)
-
-if itt_include == None:
-    print('ITT include {0} not found. Set env varable {1} to directory of {0}'.format(itt_include_file_name, ITT_INCLUDE_DIR_ENV))
-    sys.exit(-1)
-else:
-    extension_args["include_dirs"].extend([itt_include_dir])
-
-# path for ittnotify.a
-ITT_LIB_DIR_ENV = "ITT_LIB_DIR"
-itt_lib_dir = os.environ.get("ITT_LIB_DIR", None)
-itt_lib_file_name = "libittnotify.a"
-itt_lib = None
-
+# itt source
+bits = '64'
 if platform.system() == "Linux":
     itt_lib_file_name = "libittnotify.a"
 else:
     itt_lib_file_name = "libittnotify.lib"
 
-if itt_lib_dir == None:
-    print('ITT library {0} not found. Set env varable {1} to directory of {0}'.format(itt_lib_file_name, ITT_LIB_DIR_ENV))
-    sys.exit(-1)
-else:
-    itt_lib_dir = itt_lib_dir.replace('"','')
-    print('{} is set to {}'.format(ITT_LIB_DIR_ENV,itt_lib_dir))
-    extension_args["library_dirs"].extend([itt_lib_dir])
+itt_lib = os.path.join(ittapi_dir, "build_" + sys.platform.replace('32', ""), bits, 'bin', itt_lib_file_name)
+if not os.path.exists(itt_lib):
+    # ittapi not found, build it
+    print('ITTAPI Library {} not found. Building'.format(itt_lib))
+    sys.stdout.flush()
+    sys.stderr.flush()
+    subprocess.run(['python', 'buildall.py', '-pt', '--force_bits', bits], cwd=ittapi_dir)
+    if not os.path.exists(itt_lib):
+        # Still not found
+        assert os.path.exists(itt_lib) , 'ITTAPI library {0} not found.'.format(itt_lib)
 
-itt_lib = os.path.join(itt_lib_dir, itt_lib_file_name)
-if itt_lib == None:
-    print('ITT library not found : {}'.format(itt_lib))
-    sys.exit(-1)
-else:
-    extension_args["extra_objects"].extend([itt_lib])
+extension_args["extra_objects"].extend([itt_lib])
 
+
+# ittnotify.h,
+itt_include_dir = [os.path.join(ittapi_dir, 'include')]
+extension_args["include_dirs"].extend(itt_include_dir)
 
 print('Extension : {}'.format(extension_args))
 extension = Extension(
