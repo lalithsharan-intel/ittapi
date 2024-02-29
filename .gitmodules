@@ -1,0 +1,3 @@
+[submodule "pyitt"]
+	path = pyitt
+	url = https://github.com/esuldin/pyitt.git
